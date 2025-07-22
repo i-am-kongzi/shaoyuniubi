@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文本与少羽牛逼转换器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 30px 0;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .description {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #666;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .converter {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+        
+        .converter-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .direction-selector {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .direction-option {
+            padding: 12px 25px;
+            background: #f0f0f0;
+            cursor: pointer;
+            font-weight: bold;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .direction-option.active {
+            background: #333;
+            color: white;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 15px;
+            font-size: 1.1rem;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #888;
+        }
+        
+        .convert-btn {
+            background: #000;
+            color: white;
+            border: none;
+            padding: 15px 0;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: background 0.3s ease, transform 0.1s ease;
+            width: 100%;
+            max-width: 300px;
+            margin: 0 auto;
+            display: block;
+        }
+        
+        .convert-btn:hover {
+            background: #333;
+        }
+        
+        .convert-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .sound-examples {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 1.2rem;
+            color: #444;
+            line-height: 1.8;
+            font-weight: 500;
+        }
+        
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 40px 0;
+        }
+        
+        .about {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            textarea {
+                height: 120px;
+            }
+            
+            .sound-examples {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>文本与少羽牛逼转换器</h1>
+        
+        <p class="description">
+            将普通文本转换成动物拟声词，或将少羽牛逼转换回文本
+        </p>
+        
+        <div class="converter">
+            <div class="direction-selector">
+                <div class="direction-option active" id="text-to-sound">文本 → 少羽牛逼</div>
+                <div class="direction-option" id="sound-to-text">少羽牛逼 → 文本</div>
+            </div>
+            
+            <div class="converter-panel">
+                <textarea id="input-area" placeholder="在此输入您要转换的文本..."></textarea>
+                
+                <button id="convert-btn" class="convert-btn">转换</button>
+                
+                <textarea id="output-area" placeholder="转换结果将显示在这里..." readonly></textarea>
+            </div>
+        </div>
+        
+        <div class="divider"></div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 获取DOM元素
+            const textToSoundBtn = document.getElementById('text-to-sound');
+            const soundToTextBtn = document.getElementById('sound-to-text');
+            const inputArea = document.getElementById('input-area');
+            const outputArea = document.getElementById('output-area');
+            const convertBtn = document.getElementById('convert-btn');
+            
+            // 当前转换方向：true表示文本转少羽牛逼，false表示少羽牛逼转文本
+            let isTextToSound = true;
+            
+            // 设置初始转换方向
+            setActiveDirection(true);
+            
+            // 切换转换方向
+            textToSoundBtn.addEventListener('click', () => {
+                setActiveDirection(true);
+                updatePlaceholders();
+            });
+            
+            soundToTextBtn.addEventListener('click', () => {
+                setActiveDirection(false);
+                updatePlaceholders();
+            });
+            
+            // 转换按钮点击事件
+            convertBtn.addEventListener('click', performConversion);
+            
+            // 设置激活的方向样式
+            function setActiveDirection(isTextToSoundValue) {
+                isTextToSound = isTextToSoundValue;
+                textToSoundBtn.classList.toggle('active', isTextToSound);
+                soundToTextBtn.classList.toggle('active', !isTextToSound);
+            }
+            
+            // 更新输入/输出区域的占位符
+            function updatePlaceholders() {
+                if (isTextToSound) {
+                    inputArea.placeholder = "在此输入您要转换的文本...";
+                    outputArea.placeholder = "转换结果将显示在这里...";
+                } else {
+                    inputArea.placeholder = "在此输入转换过后的文本…";
+                    outputArea.placeholder = "文本结果将显示在这里...";
+                }
+            }
+            
+            // 执行转换操作
+            function performConversion() {
+                const input = inputArea.value.trim();
+                
+                if (!input) {
+                    alert("请输入要转换的内容");
+                    return;
+                }
+                
+                try {
+                    if (isTextToSound) {
+                        outputArea.value = textToAnimalSound(input);
+                    } else {
+                        outputArea.value = animalSoundToText(input);
+                    }
+                } catch (e) {
+                    outputArea.value = "转换失败: " + e.message;
+                }
+            }
+            
+            // 文本转少羽牛逼
+            function textToAnimalSound(text) {
+                let result = [];
+                
+                for (let char of text) {
+                    // 获取Unicode编码
+                    const code = char.charCodeAt(0);
+                    
+                    // 转换为四进制，并去掉基数标识
+                    let quaternary = code.toString(4);
+                    
+                    // 将每个数字替换为少羽牛逼
+                    let soundString = '';
+                    for (let digit of quaternary) {
+                        switch (digit) {
+                            case '0': soundString += '少'; break;
+                            case '1': soundString += '羽'; break;
+                            case '2': soundString += '牛'; break;
+                            case '3': soundString += '逼'; break;
+                            default: 
+                                throw new Error('四进制转换错误');
+                        }
+                    }
+                    
+                    // 添加到结果数组，使用分隔符连接
+                    result.push(soundString);
+                }
+                
+                return result.join('超');
+            }
+            
+            // 拟声词转文本
+            function animalSoundToText(soundString) {
+                // 分割拟声词单元
+                const soundUnits = soundString.split('超');
+                
+                return soundUnits.map(unit => {
+                    let quaternary = '';
+                    
+                    for (let sound of unit) {
+                        switch (sound) {
+                            case '少': quaternary += '0'; break;
+                            case '羽': quaternary += '1'; break;
+                            case '牛': quaternary += '2'; break;
+                            case '逼': quaternary += '3'; break;
+                            default: 
+                                throw new Error(`检测到无效的少羽牛逼: ${sound}`);
+                        }
+                    }
+                    
+                    // 将四进制转换为十进制
+                    const decimal = parseInt(quaternary, 4);
+                    
+                    // 将Unicode代码点转换为字符
+                    return String.fromCharCode(decimal);
+                }).join('');
+            }
+        });
+    </script>
+</body>
+</html>
